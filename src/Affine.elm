@@ -24,7 +24,7 @@ newtype MatrixAffine = MatrixAffine ((Elem, Elem, Elem),
 
 instance Monoid MatrixAffine where
     mempty = identity
-    a `mappend` b = a `Affine.concat` b
+    a `mappend` b = a `concat` b
 
 
 {-| Identity matrix. -}
@@ -73,7 +73,7 @@ transform (MatrixAffine ((m11, m12, m13),
 {-| Calculate a two finger touch transformation. -}
 twoPointTransformation : (Vector, Vector) -> (Vector, Vector) -> MatrixAffine
 twoPointTransformation (s1, s2) (d1, d2) =
-    tScale `Affine.concat` tRotate `Affine.concat` tTranslate
+    tScale `concat` tRotate `concat` tTranslate
     where
         tTranslate = translate (d1 `sub` s1ScaleRow)
         s1ScaleRow = s1 -: (transform tScale) -: (transform tRotate)
