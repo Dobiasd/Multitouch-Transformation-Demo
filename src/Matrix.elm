@@ -1,6 +1,5 @@
 module Matrix where
 
-import Common (map4t)
 import Vector2D (Vector, Point, sub, length, angle2D)
 
 type Elem = Float
