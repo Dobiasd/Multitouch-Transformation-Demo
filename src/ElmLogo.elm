@@ -1,13 +1,15 @@
 module ElmLogo where
 
-{-| Generates a the Elm logo.
+{-| Generates a the Elm logo according to a given transformation
 -}
 
 import Matrix (Matrix, transform)
 
 import Transform2D
 
-{-| Returns the Elm logo as a centered 200x200 Form. -}
+{-| Returns the Elm logo as Form
+    With an identity transformation it will result
+    centered and sized 200x200. -}
 elmLogo : Matrix -> Form
 elmLogo matrix =
   let

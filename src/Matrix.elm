@@ -1,5 +1,8 @@
 module Matrix where
 
+{-| Matrix functions for affine and perspective transformations.
+-}
+
 import Vector2D (Vector, Point, sub, length, angle2D)
 
 type Elem = Float
@@ -50,10 +53,13 @@ rotateOrigin a =  ((cos a, -(sin a), 0),
                    (sin a,   cos a , 0),
                    (  0  ,     0   , 1))
 
+{-| Calculate a one finger touch transformation. -}
+onePointTransformation : (Vector, Vector) -> Matrix
+onePointTransformation (s, d) = translate (d `sub` s)
 
 {-| Calculate a two finger touch transformation. -}
 twoPointTransformation : (Vector, Vector) -> (Vector, Vector) -> Matrix
-twoPointTransformation (s1, s2) (d1, d2) =
+twoPointTransformation (s1, d1) (s2, d2) =
     let
         tTranslate = translate (d1 `sub` s1ScaleRow)
         s1ScaleRow = s1 |> (transform tScale) |> (transform tRotate)
@@ -71,11 +77,13 @@ twoPointTransformation (s1, s2) (d1, d2) =
 {-| Calculate the transformation
     bringing the first three points exactly onto the last three points. -}
 threePointTransformation :
-    (Vector, Vector, Vector) ->
-    (Vector, Vector, Vector) -> Matrix
+    (Vector, Vector) ->
+    (Vector, Vector) ->
+    (Vector, Vector) -> Matrix
 threePointTransformation
-        ((s1x, s1y), (s2x, s2y), (s3x, s3y))
-        ((d1x, d1y), (d2x, d2y), (d3x, d3y)) =
+        ((s1x, s1y), (d1x, d1y))
+        ((s2x, s2y), (d2x, d2y))
+        ((s3x, s3y), (d3x, d3y)) =
     let
         a1 = ((d1x-d2x)*(s1y-s3y)-(d1x-d3x)*(s1y-s2y))/
              ((s1x-s2x)*(s1y-s3y)-(s1x-s3x)*(s1y-s2y))
@@ -95,12 +103,18 @@ threePointTransformation
 {-| Calculate the transformation
     bringing the first four points exactly onto the last four points. -}
 fourPointTransformation :
-    (Vector, Vector, Vector, Vector) ->
-    (Vector, Vector, Vector, Vector) -> Matrix
-fourPointTransformation sPts dPts =
+    (Vector, Vector) ->
+    (Vector, Vector) ->
+    (Vector, Vector) ->
+    (Vector, Vector) -> Matrix
+fourPointTransformation
+        (s1, d1)
+        (s2, d2)
+        (s3, d3)
+        (s4, d4) =
     let
-        t1 = fourPointTransformationFromUnitCube sPts |> invert
-        t2 = fourPointTransformationFromUnitCube dPts
+        t1 = fourPointTransformationFromUnitCube (s1, s2, s3, s4) |> invert
+        t2 = fourPointTransformationFromUnitCube (d1, d2, d3, d4)
     in
         t1 `concat` t2
 

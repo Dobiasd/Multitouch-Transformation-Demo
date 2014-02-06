@@ -1,5 +1,8 @@
 module Vector2D  where
 
+{-| Two dimensional vector functions.
+-}
+
 type Elem = Float
 
 type Vector = (Elem, Elem)
