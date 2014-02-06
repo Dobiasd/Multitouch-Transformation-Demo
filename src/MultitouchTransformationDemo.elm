@@ -2,15 +2,17 @@ module MultitouchTransformationDemo where
 
 import Touch
 import Window
-
+import ElmLogo (elmLogo)
 import Matrix
 import Vector2D
 
 main = lift2 scene Window.dimensions Touch.touches
 
 scene (w,h) touches =
-  let dots = map (makeCircle (toFloat w) (toFloat h)) touches
-  in  layers [ collage w h dots, message ]
+  let
+      dots = map (makeCircle (toFloat w) (toFloat h)) touches
+      logo = collage w h [elmLogo (Matrix.identity)]
+  in  layers [ collage w h dots, message, logo]
 
 makeCircle w h {x,y} =
     circle 60 |> filled green
