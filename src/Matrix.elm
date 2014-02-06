@@ -178,6 +178,9 @@ invert (((m11, m12, m13),
          (a21, a22, a23),
          (a31, a32, a33))
 
+{-| Apply function to every element in 4-tuple. -}
+map4t : (a -> b) -> (a, a, a, a) -> (b, b, b, b)
+map4t f (a, b, c, d) = (f a, f b, f c, f d)
 
 {-| Concatenates two perspective transformation matrixes. -}
 concat : Matrix -> Matrix -> Matrix
