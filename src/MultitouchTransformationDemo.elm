@@ -15,62 +15,85 @@ type State = { acc:Matrix
              , curr:Matrix
              , size:(Int,Int)
              , touches:[Touch.Touch]
-             , pairs:[(Vector2D.Vector, Vector2D.Vector)] }
+             , offsets:[Vector2D.Vector]
+             , pairs :[(Vector2D.Vector,Vector2D.Vector)]}
 
 type Input = { newSize:(Int,Int), newTouches:[Touch.Touch] }
 
+sortTouches : [Touch.Touch] -> [Touch.Touch]
+sortTouches = sortBy .t0
+
 input : Signal Input
-input = (Input <~ Window.dimensions ~ Touch.touches)
+input = (Input <~ Window.dimensions ~ (lift sortTouches Touch.touches))
 
 defaultState : State
 defaultState = { acc = identity
                , curr = identity
                , size = (1,1)
                , touches = []
+               , offsets = repeat 4 (0,0)
                , pairs = [] }
 
 state : Signal State
 state = foldp stepState defaultState input
 
-
 subPairs ((a, b), (c, d)) ((e, f), (g, h)) = ((a-e, b-f), (c-g, d-h))
+--subPairFst ((a, b), (c, d)) (e, f) = ((a-e, b-f), (c, d))
+subPairSnd ((a, b), (c, d)) (e, f) = ((a, b), (c-e, d-f))
+addPairFst ((a, b), (c, d)) (e, f) = ((a+e, b+f), (c, d))
+
+pairDiff : (Vector2D.Vector, Vector2D.Vector) -> Vector2D.Vector
+pairDiff (a, b) = b `Vector2D.sub` a
 
 stepState : Input -> State -> State
 stepState {newSize, newTouches}
-    ({acc, curr, size, touches, pairs} as state) =
+    ({acc, curr, size, touches, offsets, pairs} as state) =
     let
         (w, h) = size
         wF = toFloat w
         hF = toFloat h
-        pairs = makePairs wF hF touches
-        touchChange = length newTouches /= length touches
+        rawPairs = makePairs wF hF newTouches
+        numChanged = length newTouches /= length touches
+        newOffsets = map pairDiff rawPairs ++ repeat 4 (0,0)
+        pairs' = if numChanged
+                 then zipWith addPairFst rawPairs newOffsets
+                 else zipWith addPairFst rawPairs offsets
 
-        t = makeTransformation pairs
+        offsets' = if numChanged
+                   then newOffsets
+                   else offsets
 
-        (acc', curr', pairs') =
-            if touchChange
-            then (acc `concat` t, identity, repeat (length touches) ((0,0),(0,0)))
-            else (acc, t, pairs)
+        t = makeTransformation pairs'
+
+        (acc', curr') =
+            if numChanged
+            then ( acc `concat` curr, t)
+            else (acc, t)
 
     in
         { state | size <- newSize
                 , touches <- newTouches
                 , acc <- acc'
                 , curr <- curr'
+                , offsets <- offsets'
                 , pairs <- pairs' }
+
 
 main = lift scene state
 
-scene ({acc, curr, size, pairs} as state) =
+scene ({acc, curr, size, touches, offsets, pairs} as state) =
   let
       (w, h) = size
       wF = toFloat w
       hF = toFloat h
       t = acc `concat` curr
-      lines = map (makeLine wF hF) pairs
       logo = collage w h [elmLogo t]
   in
-      layers [logo, message, collage w h lines]
+      flow down [ layers [logo, message]
+                --, asText touches
+                --, asText pairs
+                --, asText offsets
+                ]
 
 touchToPointPair : Touch.Touch -> (Vector2D.Vector, Vector2D.Vector)
 touchToPointPair {x, y, x0, y0} = (((toFloat x0), (toFloat y0)),
