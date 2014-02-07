@@ -7,16 +7,16 @@ module MultitouchTransformationDemo where
 import Touch
 import Window
 import ElmLogo (elmLogo)
-import Matrix(Matrix, identity, concat, invert)
+import Matrix (Matrix, identity, concat, invert)
 import Matrix
-import Vector2D
+import Vector2D (Vector, add, sub)
 
 type State = { acc:Matrix
              , curr:Matrix
              , size:(Int,Int)
              , touches:[Touch.Touch]
-             , offsets:[Vector2D.Vector]
-             , pairs :[(Vector2D.Vector,Vector2D.Vector)]}
+             , offsets:[Vector]
+             , pairs :[(Vector,Vector)]}
 
 type Input = { newSize:(Int,Int), newTouches:[Touch.Touch] }
 
@@ -37,24 +37,21 @@ defaultState = { acc = identity
 state : Signal State
 state = foldp stepState defaultState input
 
-subPairs ((a, b), (c, d)) ((e, f), (g, h)) = ((a-e, b-f), (c-g, d-h))
---subPairFst ((a, b), (c, d)) (e, f) = ((a-e, b-f), (c, d))
-subPairSnd ((a, b), (c, d)) (e, f) = ((a, b), (c-e, d-f))
-addPairFst ((a, b), (c, d)) (e, f) = ((a+e, b+f), (c, d))
+addPairFst (a, b) c = (a `add` c, b)
 
-pairDiff : (Vector2D.Vector, Vector2D.Vector) -> Vector2D.Vector
-pairDiff (a, b) = b `Vector2D.sub` a
+pairDiff : (Vector, Vector) -> Vector
+pairDiff (a, b) = b `sub` a
 
 stepState : Input -> State -> State
 stepState {newSize, newTouches}
     ({acc, curr, size, touches, offsets, pairs} as state) =
     let
         (w, h) = size
-        wF = toFloat w
-        hF = toFloat h
+        (wF, hF) = (toFloat w, toFloat h)
         rawPairs = makePairs wF hF newTouches
         numChanged = length newTouches /= length touches
         newOffsets = map pairDiff rawPairs ++ repeat 4 (0,0)
+
         pairs' = if numChanged
                  then zipWith addPairFst rawPairs newOffsets
                  else zipWith addPairFst rawPairs offsets
@@ -84,35 +81,29 @@ main = lift scene state
 scene ({acc, curr, size, touches, offsets, pairs} as state) =
   let
       (w, h) = size
-      wF = toFloat w
-      hF = toFloat h
+      (wF, hF) = (toFloat w, toFloat h)
       t = acc `concat` curr
       logo = collage w h [elmLogo t]
   in
-      flow down [ layers [logo, message]
-                --, asText touches
-                --, asText pairs
-                --, asText offsets
-                ]
+      layers [logo, message]
 
-touchToPointPair : Touch.Touch -> (Vector2D.Vector, Vector2D.Vector)
+touchToPointPair : Touch.Touch -> (Vector, Vector)
 touchToPointPair {x, y, x0, y0} = (((toFloat x0), (toFloat y0)),
                                    ((toFloat x ), (toFloat y )))
 
-touchPosToScreenPos : Float -> Float -> Vector2D.Vector -> Vector2D.Vector
+touchPosToScreenPos : Float -> Float -> Vector -> Vector
 touchPosToScreenPos w h (x, y) = (x - w/2, h/2 - y)
 
 makeLine w h pair =
     [fst pair, snd pair] |> map (touchPosToScreenPos w h)
-                            |> traced (solid red)
+                         |> traced (solid red)
 
 makePairs w h touches =
     let
         map2t f (a, b) = (f a, f b)
-        apairs = touches |> map touchToPointPair
-                         |> map (map2t (touchPosToScreenPos w h))
     in
-        [] ++ apairs
+        touches |> map touchToPointPair
+                |> map (map2t (touchPosToScreenPos w h))
 
 makeTransformation pairs =
     let
