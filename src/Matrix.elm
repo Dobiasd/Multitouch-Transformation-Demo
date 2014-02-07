@@ -163,8 +163,8 @@ fourPointTransformationFromUnitCube
 {-| Determinant of a perspective transformation matrix. -}
 determinant : Matrix -> Elem
 determinant  ((a, b, c),
-                                (d, e, f),
-                                (g, h, i)) =
+              (d, e, f),
+              (g, h, i)) =
     a*e*i + b*f*g + c*d*h - c*e*g - b*d*i - a*f*h
 
 
