@@ -7,7 +7,7 @@ module MultitouchTransformationDemo where
 import Touch
 import Window
 import ElmLogo (elmLogo)
-import Matrix (Matrix, identity, concat, invert)
+import Matrix (Matrix, identityMat, mConcat, invert)
 import Matrix
 import Vector2D (Vector, add, sub)
 
@@ -27,8 +27,8 @@ input : Signal Input
 input = (Input <~ Window.dimensions ~ (lift sortTouches Touch.touches))
 
 defaultState : State
-defaultState = { acc = identity
-               , curr = identity
+defaultState = { acc = identityMat
+               , curr = identityMat
                , size = (1,1)
                , touches = []
                , offsets = repeat 4 (0,0)
@@ -64,7 +64,7 @@ stepState {newSize, newTouches}
 
         (acc', curr') =
             if numChanged
-            then ( acc `concat` curr, t)
+            then ( acc `mConcat` curr, t)
             else (acc, t)
 
     in
@@ -82,7 +82,7 @@ scene ({acc, curr, size, touches, offsets, pairs} as state) =
   let
       (w, h) = size
       (wF, hF) = (toFloat w, toFloat h)
-      t = acc `concat` curr
+      t = acc `mConcat` curr
       logo = collage w h [elmLogo t]
   in
       layers [logo, message]
@@ -107,7 +107,7 @@ makePairs w h touches =
 
 makeTransformation pairs =
     let
-        nth n = head . drop n
+        nth n = drop n >> head
     in
         case length pairs of
             1 -> Matrix.onePointTransformation   (nth 0 pairs)
@@ -120,7 +120,7 @@ makeTransformation pairs =
                                                  (nth 1 pairs)
                                                  (nth 2 pairs)
                                                  (nth 3 pairs)
-            _ -> Matrix.identity
+            _ -> Matrix.identityMat
 
 message = [markdown|
 Use 1, 2, 3 or 4 fingers to

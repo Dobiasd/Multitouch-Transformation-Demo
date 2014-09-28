@@ -9,12 +9,12 @@ type Vector = (Elem, Elem)
 type Point = Vector
 
 {-| Euclidian distance to the origin. -}
-length : Vector -> Elem
-length (x, y) = sqrt <| x^2 + y^2
+vLength : Vector -> Elem
+vLength (x, y) = sqrt <| x^2 + y^2
 
 {-| Distance between two Points. -}
 dist : Point -> Point -> Elem
-dist a b = length <| a `sub` b
+dist a b = vLength <| a `sub` b
 
 {-| Reverse vector -}
 invert : Vector -> Vector
@@ -42,4 +42,4 @@ fromAngle angle = ((sin angle), (cos angle))
 
 {-| Scale vector to length 1. -}
 normalize : Vector -> Vector
-normalize v = v `mult` (1 / length v)
+normalize v = v `mult` (1 / vLength v)

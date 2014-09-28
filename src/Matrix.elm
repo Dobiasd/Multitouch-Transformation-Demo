@@ -3,7 +3,7 @@ module Matrix where
 {-| Matrix functions for affine and perspective transformations.
 -}
 
-import Vector2D (Vector, Point, sub, length, angle2D)
+import Vector2D (Vector, Point, sub, vLength, angle2D)
 
 type Elem = Float
 
@@ -26,8 +26,8 @@ transform ((m11, m12, m13),
 
 
 {-| Identity matrix. -}
-identity : Matrix
-identity = ((1, 0, 0),
+identityMat : Matrix
+identityMat = ((1, 0, 0),
             (0, 1, 0),
             (0, 0, 1))
 
@@ -39,11 +39,11 @@ translate (x, y) = ((1, 0, x),
 
 {-| Scale matrix. -}
 scaleProportional : Elem -> Matrix
-scaleProportional s = scale s s
+scaleProportional s = mScale s s
 
 {-| Scale matrix. -}
-scale : Elem -> Elem -> Matrix
-scale sx sy = ((sx,  0, 0),
+mScale : Elem -> Elem -> Matrix
+mScale sx sy = ((sx,  0, 0),
                ( 0, sy, 0),
                ( 0,  0, 1))
 
@@ -67,10 +67,10 @@ twoPointTransformation (s1, d1) (s2, d2) =
         tScale = scaleProportional scaleFactor
         sDiff = s2 `sub` s1
         dDiff = d2 `sub` d1
-        scaleFactor = length dDiff / length sDiff
+        scaleFactor = vLength dDiff / vLength sDiff
         angle = angle2D sDiff - angle2D dDiff
     in
-        tScale `concat` tRotate `concat` tTranslate
+        tScale `mConcat` tRotate `mConcat` tTranslate
 
 
 -- source: http://stackoverflow.com/questions/1114257/transform-a-triangle-to-another-triangle
@@ -116,7 +116,7 @@ fourPointTransformation
         t1 = fourPointTransformationFromUnitCube (s1, s2, s3, s4) |> invert
         t2 = fourPointTransformationFromUnitCube (d1, d2, d3, d4)
     in
-        t1 `concat` t2
+        t1 `mConcat` t2
 
 -- https://github.com/GNOME/gimp/blob/master/app/core/gimp-transform-utils.c
 -- -> gimp_transform_matrix_perspective
@@ -196,8 +196,8 @@ map4t : (a -> b) -> (a, a, a, a) -> (b, b, b, b)
 map4t f (a, b, c, d) = (f a, f b, f c, f d)
 
 {-| Concatenates two perspective transformation matrixes. -}
-concat : Matrix -> Matrix -> Matrix
-a `concat` b =
+mConcat : Matrix -> Matrix -> Matrix
+a `mConcat` b =
     let
         sourcePoints =  ((0, 0), (1, 0), (0, 1), (1, 1))
         destPoints = sourcePoints |> map4t (transform a)

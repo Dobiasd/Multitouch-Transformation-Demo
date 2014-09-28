@@ -3,7 +3,7 @@ module ElmLogo where
 {-| Generates a the Elm logo according to a given transformation
 -}
 
-import Matrix (Matrix, transform, invert, concat, translate, scale)
+import Matrix (Matrix, transform, invert, mConcat, translate, mScale)
 
 import Transform2D
 
@@ -14,9 +14,9 @@ elmLogo : Matrix -> Form
 elmLogo matrix =
   let
     t1 = translate (-150, -150)
-    t2 = scale 1 -1
+    t2 = mScale 1 -1
     t3 = matrix
-    ta = (t1 `concat` t2) `concat` t3
+    ta = (t1 `mConcat` t2) `mConcat` t3
     t = map (transform ta)
     p1 = [(266, 32), (156, 32), (266, 142)] |> t |> polygon
            |> filled (rgb 96 181 204)
