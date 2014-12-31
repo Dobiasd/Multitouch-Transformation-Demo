@@ -5,12 +5,12 @@ module Matrix where
 
 import Vector2D (Vector, Point, sub, vLength, angle2D)
 
-type Elem = Float
+type alias Elem = Float
 
 {-| Perspective transformation matrix. -}
-type Matrix = ((Elem, Elem, Elem),
-               (Elem, Elem, Elem),
-               (Elem, Elem, Elem))
+type alias Matrix = ((Elem, Elem, Elem),
+                     (Elem, Elem, Elem),
+                     (Elem, Elem, Elem))
 
 
 {-| Transform a point by a perspective matrix. -}

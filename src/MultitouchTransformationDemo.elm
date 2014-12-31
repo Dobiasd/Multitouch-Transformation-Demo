@@ -4,38 +4,45 @@ module MultitouchTransformationDemo where
     different transformation types by user input (1, 2, 3 and 4 fingers)
 -}
 
+import Color(red)
+import Graphics.Collage(collage, traced, solid)
+import Graphics.Element(layers)
+import List
+import Text
 import Touch
 import Window
+import Signal ((<~),(~))
+import Signal
 import ElmLogo (elmLogo)
 import Matrix (Matrix, identityMat, mConcat, invert)
 import Matrix
 import Vector2D (Vector, add, sub)
 
-type State = { acc:Matrix
-             , curr:Matrix
-             , size:(Int,Int)
-             , touches:[Touch.Touch]
-             , offsets:[Vector]
-             , pairs :[(Vector,Vector)]}
+type alias State = { acc:Matrix
+                   , curr:Matrix
+                   , size:(Int,Int)
+                   , touches:List Touch.Touch
+                   , offsets:List Vector
+                   , pairs :List (Vector,Vector)}
 
-type Input = { newSize:(Int,Int), newTouches:[Touch.Touch] }
+type alias Input = { newSize:(Int,Int), newTouches:List Touch.Touch }
 
-sortTouches : [Touch.Touch] -> [Touch.Touch]
-sortTouches = sortBy .t0
+sortTouches : List Touch.Touch -> List Touch.Touch
+sortTouches = List.sortBy .t0
 
-input : Signal Input
-input = (Input <~ Window.dimensions ~ (lift sortTouches Touch.touches))
+input : Signal.Signal Input
+input = (Input <~ Window.dimensions ~ (Signal.map sortTouches Touch.touches))
 
 defaultState : State
 defaultState = { acc = identityMat
                , curr = identityMat
                , size = (1,1)
                , touches = []
-               , offsets = repeat 4 (0,0)
+               , offsets = List.repeat 4 (0,0)
                , pairs = [] }
 
-state : Signal State
-state = foldp stepState defaultState input
+state : Signal.Signal State
+state = Signal.foldp stepState defaultState input
 
 addPairFst (a, b) c = (a `add` c, b)
 
@@ -49,12 +56,12 @@ stepState {newSize, newTouches}
         (w, h) = size
         (wF, hF) = (toFloat w, toFloat h)
         rawPairs = makePairs wF hF newTouches
-        numChanged = length newTouches /= length touches
-        newOffsets = map pairDiff rawPairs ++ repeat 4 (0,0)
+        numChanged = List.length newTouches /= List.length touches
+        newOffsets = List.map pairDiff rawPairs ++ List.repeat 4 (0,0)
 
         pairs' = if numChanged
-                 then zipWith addPairFst rawPairs newOffsets
-                 else zipWith addPairFst rawPairs offsets
+                 then List.map2 addPairFst rawPairs newOffsets
+                 else List.map2 addPairFst rawPairs offsets
 
         offsets' = if numChanged
                    then newOffsets
@@ -76,7 +83,7 @@ stepState {newSize, newTouches}
                 , pairs <- pairs' }
 
 
-main = lift scene state
+main = Signal.map scene state
 
 scene ({acc, curr, size, touches, offsets, pairs} as state) =
   let
@@ -95,21 +102,21 @@ touchPosToScreenPos : Float -> Float -> Vector -> Vector
 touchPosToScreenPos w h (x, y) = (x - w/2, h/2 - y)
 
 makeLine w h pair =
-    [fst pair, snd pair] |> map (touchPosToScreenPos w h)
+    [fst pair, snd pair] |> List.map (touchPosToScreenPos w h)
                          |> traced (solid red)
 
 makePairs w h touches =
     let
         map2t f (a, b) = (f a, f b)
     in
-        touches |> map touchToPointPair
-                |> map (map2t (touchPosToScreenPos w h))
+        touches |> List.map touchToPointPair
+                |> List.map (map2t (touchPosToScreenPos w h))
 
 makeTransformation pairs =
     let
-        nth n = drop n >> head
+        nth n = List.drop n >> List.head
     in
-        case length pairs of
+        case List.length pairs of
             1 -> Matrix.onePointTransformation   (nth 0 pairs)
             2 -> Matrix.twoPointTransformation   (nth 0 pairs)
                                                  (nth 1 pairs)
@@ -122,6 +129,4 @@ makeTransformation pairs =
                                                  (nth 3 pairs)
             _ -> Matrix.identityMat
 
-message = [markdown|
-Use 1, 2, 3 or 4 fingers to
-move, rotate, scale and distort the elm logo. :-)|]
+message = Text.plainText "Use 1, 2, 3 or 4 fingers to\nmove, rotate, scale and distort the elm logo. :-)"

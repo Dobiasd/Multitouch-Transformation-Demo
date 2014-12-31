@@ -3,10 +3,10 @@ module Vector2D  where
 {-| Two dimensional vector functions.
 -}
 
-type Elem = Float
+type alias Elem = Float
 
-type Vector = (Elem, Elem)
-type Point = Vector
+type alias Vector = (Elem, Elem)
+type alias Point = Vector
 
 {-| Euclidian distance to the origin. -}
 vLength : Vector -> Elem
