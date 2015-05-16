@@ -7,7 +7,7 @@ module MultitouchTransformationDemo where
 import Color exposing (red)
 import Debug
 import Graphics.Collage exposing (collage, traced, solid)
-import Graphics.Element exposing (layers, show)
+import Graphics.Element exposing (layers, leftAligned)
 import List
 import Text
 import Touch
@@ -135,4 +135,5 @@ makeTransformation pairs =
                                                  (nth 3 pairs)
             _ -> Matrix.identityMat
 
-message = show "Use 1, 2, 3 or 4 fingers to\nmove, rotate, scale and distort the elm logo. :-)"
+message = "Use 1, 2, 3 or 4 fingers to\nmove, rotate, scale and distort the elm logo. :-)"
+  |> Text.fromString |> leftAligned
