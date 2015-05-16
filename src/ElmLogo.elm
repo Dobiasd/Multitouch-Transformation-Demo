@@ -3,10 +3,10 @@ module ElmLogo where
 {-| Generates a the Elm logo according to a given transformation
 -}
 
-import Color (rgb)
-import List (map)
-import Graphics.Collage (polygon, filled, group, Form)
-import Matrix (Matrix, transform, invert, mConcat, translate, mScale)
+import Color exposing (rgb)
+import List exposing (map)
+import Graphics.Collage exposing (polygon, filled, group, Form)
+import Matrix exposing (Matrix, transform, invert, mConcat, translate, mScale)
 
 import Transform2D
 

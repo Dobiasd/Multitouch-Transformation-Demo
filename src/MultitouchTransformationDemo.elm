@@ -4,19 +4,20 @@ module MultitouchTransformationDemo where
     different transformation types by user input (1, 2, 3 and 4 fingers)
 -}
 
-import Color(red)
-import Graphics.Collage(collage, traced, solid)
-import Graphics.Element(layers)
+import Color exposing (red)
+import Debug
+import Graphics.Collage exposing (collage, traced, solid)
+import Graphics.Element exposing (layers, show)
 import List
 import Text
 import Touch
 import Window
-import Signal ((<~),(~))
+import Signal exposing ((<~),(~))
 import Signal
-import ElmLogo (elmLogo)
-import Matrix (Matrix, identityMat, mConcat, invert)
+import ElmLogo exposing (elmLogo)
+import Matrix exposing (Matrix, identityMat, mConcat, invert)
 import Matrix
-import Vector2D (Vector, add, sub)
+import Vector2D exposing (Vector, add, sub)
 
 type alias State = { acc:Matrix
                    , curr:Matrix
@@ -112,9 +113,14 @@ makePairs w h touches =
         touches |> List.map touchToPointPair
                 |> List.map (map2t (touchPosToScreenPos w h))
 
+unsafeHead : List a -> a
+unsafeHead xs = case xs of
+  (x::_) -> x
+  _ -> Debug.crash "unsafeHead with empty list"
+
 makeTransformation pairs =
     let
-        nth n = List.drop n >> List.head
+        nth n = List.drop n >> unsafeHead
     in
         case List.length pairs of
             1 -> Matrix.onePointTransformation   (nth 0 pairs)
@@ -129,4 +135,4 @@ makeTransformation pairs =
                                                  (nth 3 pairs)
             _ -> Matrix.identityMat
 
-message = Text.plainText "Use 1, 2, 3 or 4 fingers to\nmove, rotate, scale and distort the elm logo. :-)"
+message = show "Use 1, 2, 3 or 4 fingers to\nmove, rotate, scale and distort the elm logo. :-)"

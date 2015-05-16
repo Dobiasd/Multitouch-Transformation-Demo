@@ -3,7 +3,7 @@ module Matrix where
 {-| Matrix functions for affine and perspective transformations.
 -}
 
-import Vector2D (Vector, Point, sub, vLength, angle2D)
+import Vector2D exposing (Vector, Point, sub, vLength, angle2D)
 
 type alias Elem = Float
 
