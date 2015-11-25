@@ -1,14 +1,14 @@
 {
     "version": "1.0.0",
     "summary": "small transformation demo (1, 2, 3 and 4 fingers)",
-    "repository": "https://github.com/Dobiasd/Multitouch-Transformation-Demo.git",
+    "repository": "https://github.com/dobiasd/multitouch-transformation-demo.git",
     "license": "MIT",
     "source-directories": [
         "src"
     ],
     "exposed-modules": [],
     "dependencies": {
-        "elm-lang/core": "2.0.1 <= v < 3.0.0"
+        "elm-lang/core": "3.0.0 <= v < 4.0.0"
     },
-    "elm-version": "0.15.0 <= v < 0.16.0"
+    "elm-version": "0.16.0 <= v < 0.17.0"
 }

@@ -22,15 +22,15 @@ invert (x, y) = (-x, -y)
 
 {-| Vector concatenation -}
 add : Vector -> Vector -> Vector
-(ax, ay) `add` (bx, by) = ((ax + bx), (ay + by))
+add (ax, ay) (bx, by) = ((ax + bx), (ay + by))
 
 {-| Difference Vector -}
 sub : Vector -> Vector -> Vector
-a `sub` b = a `add` (invert b)
+sub a b = a `add` (invert b)
 
 {-| Scale length of a Vector -}
 mult : Vector -> Elem -> Vector
-(x, y) `mult` s = ((s * x), (s * y))
+mult (x, y) s = ((s * x), (s * y))
 
 {-| Angle in the x-y-plane. -}
 angle2D : Vector -> Elem

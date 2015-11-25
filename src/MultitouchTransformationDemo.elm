@@ -6,13 +6,12 @@ module MultitouchTransformationDemo where
 
 import Color exposing (red)
 import Debug
-import Graphics.Collage exposing (collage, traced, solid)
+import Graphics.Collage exposing (collage, traced, solid, path)
 import Graphics.Element exposing (layers, leftAligned)
 import List
 import Text
 import Touch
 import Window
-import Signal exposing ((<~),(~))
 import Signal
 import ElmLogo exposing (elmLogo)
 import Matrix exposing (Matrix, identityMat, mConcat, invert)
@@ -32,7 +31,7 @@ sortTouches : List Touch.Touch -> List Touch.Touch
 sortTouches = List.sortBy .t0
 
 input : Signal.Signal Input
-input = (Input <~ Window.dimensions ~ (Signal.map sortTouches Touch.touches))
+input = Signal.map2 Input Window.dimensions (Signal.map sortTouches Touch.touches)
 
 defaultState : State
 defaultState = { acc = identityMat
@@ -76,12 +75,12 @@ stepState {newSize, newTouches}
             else (acc, t)
 
     in
-        { state | size <- newSize
-                , touches <- newTouches
-                , acc <- acc'
-                , curr <- curr'
-                , offsets <- offsets'
-                , pairs <- pairs' }
+        { state | size = newSize
+                , touches = newTouches
+                , acc = acc'
+                , curr = curr'
+                , offsets = offsets'
+                , pairs = pairs' }
 
 
 main = Signal.map scene state
@@ -104,6 +103,7 @@ touchPosToScreenPos w h (x, y) = (x - w/2, h/2 - y)
 
 makeLine w h pair =
     [fst pair, snd pair] |> List.map (touchPosToScreenPos w h)
+                         |> path
                          |> traced (solid red)
 
 makePairs w h touches =

@@ -197,7 +197,7 @@ map4t f (a, b, c, d) = (f a, f b, f c, f d)
 
 {-| Concatenates two perspective transformation matrixes. -}
 mConcat : Matrix -> Matrix -> Matrix
-a `mConcat` b =
+mConcat a b =
     let
         sourcePoints =  ((0, 0), (1, 0), (0, 1), (1, 1))
         destPoints = sourcePoints |> map4t (transform a)
